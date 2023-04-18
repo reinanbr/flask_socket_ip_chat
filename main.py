@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template,request
 from flask_socketio import SocketIO
 from flask import Flask
 from flask_cors import CORS, cross_origin
@@ -17,17 +17,38 @@ socketio = SocketIO(app,cors_allowed_origins="*",async_mode=None)
 def index():
     return 'on'
 
+
+db = {'users':{},'messages':[]}
+
+
 # connected
 @socketio.on('connected')
 def connect(data):
     print(data)
+    sid = request.sid
+    user = {'session_id':sid,'userKey':data['userKey']}
+    db['messages'].append(data)
+    if sid in db['users'].keys():
+        print(f'{user} is refused')
+        socketio.emit('connected',{'user':user,'connected':False,'because':'same sid user'})
+        return False
+    else:
+        db['users'][user['session_id']] = user
+        print(f'{user} is connected!')
+        socketio.emit('usersCount',db['users'])
+        socketio.emit('connected',{'user':user,'connected':True,'countUsers':len(db['users'])})
 
 
 #disconnected
 @socketio.on('disconnect')
-def disconnected(data_):
-    print(data_)
-    socketio.on('disconnect',data_)
+def disconnected():
+    user = db['users'][request.sid]
+    print(f'{user} is disconnected')
+    del db['users'][request.sid]
+ 
+    socketio.emit('usersCount',db['users'])
+    socketio.emit('connected',{'user':user,'connected':True,'countUsers':len(db['users'])})
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
