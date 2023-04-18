@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+</head>
+<body>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
+    <script>
+      
+        const socket = io('http://192.168.3.57:5000')
+        username=io.id
+        
+        socket.on('connect', function() {
+            socket.emit('connected', {'username':username,'text': 'I\'m connected!'});
+        $('#server_status').html(`<i title='Server Online' class="material-icons green">brightness_1</i>`)
+        });
+        socket.on('disconnect',()=>{
+            $('#server_status').html(`<i title='Server Offline' class="material-icons red">brightness_1</i>`)
+        });
+
+        window.onbeforeunload = function () {
+            socket.emit('disconnected', {'username':username,'text':`I'm exit`});
+
+        }
+    </script>
+</body>
+</html>
