@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request
+from flask import Flask, render_template,request,jsonify
 from flask_socketio import SocketIO
 from flask import Flask
 from flask_cors import CORS, cross_origin
@@ -15,7 +15,7 @@ socketio = SocketIO(app,cors_allowed_origins="*",async_mode=None)
 
 @app.route('/')
 def index():
-    return 'on'
+    return jsonify(db)
 
 
 db = {'users':{},'messages':[]}
